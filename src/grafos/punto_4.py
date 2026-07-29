@@ -42,4 +42,57 @@ def dijkstra(grafo, origen):
 
     return distancias, anteriores
 
+def reconstruir_camino(anteriores, origen, destino):
+    """
+    Reconstruye el camino mínimo desde origen hasta destino.
+    """
+
+    camino = []
+    actual = destino
+
+    while actual is not None:
+        camino.append(actual)
+        actual = anteriores[actual]
+
+    camino.reverse()
+
+    if camino[0] == origen:
+        return camino
+
+    return []
+
+
+def main():
+
+    grafo = {
+        "A": {"B": 4, "C": 2},
+        "B": {"A": 4, "C": 1, "D": 5},
+        "C": {"A": 2, "B": 1, "D": 8, "E": 10},
+        "D": {"B": 5, "C": 8, "E": 2, "F": 6},
+        "E": {"C": 10, "D": 2, "F": 3},
+        "F": {"D": 6, "E": 3},
+    }
+
+    origen = input("Nodo origen: ").upper()
+
+    if origen not in grafo:
+        print("El nodo no existe.")
+        return
+
+    distancias, anteriores = dijkstra(grafo, origen)
+
+    print("\nDISTANCIAS MÍNIMAS")
+
+    for nodo in grafo:
+        print(f"{origen} -> {nodo}: {distancias[nodo]}")
+
+    print("\n CAMINOS ")
+
+    for nodo in grafo:
+        camino = reconstruir_camino(anteriores, origen, nodo)
+        print(f"{origen} -> {nodo}: {' -> '.join(camino)}")
+
+
+if __name__ == "__main__":
+    main()
 
