@@ -19,36 +19,23 @@ H = (1 / np.sqrt(2)) * np.array([
     [1, -1]
 ])
 
-
 # Estado inicial |0>
-estado = np.array([1, 0], dtype=float)
+estado_inicial = np.array([1, 0], dtype=float)
 
 
 # ===========================
-# APLICAR COMPUERTA
+# FUNCIONES
 # ===========================
 
 def aplicar_compuerta(estado, compuerta):
     return np.dot(compuerta, estado)
 
 
-# ===========================
-# PROBABILIDADES
-# ===========================
-
 def probabilidades(estado):
-    p0 = abs(estado[0]) ** 2
-    p1 = abs(estado[1]) ** 2
-
-    print(f"P(0) = {p0:.4f}")
-    print(f"P(1) = {p1:.4f}")
-
+    p0 = abs(estado[0])**2
+    p1 = abs(estado[1])**2
     return p0, p1
 
-
-# ===========================
-# MEDICIONES
-# ===========================
 
 def medir(estado, veces=1000):
 
@@ -63,48 +50,50 @@ def medir(estado, veces=1000):
     ceros = np.sum(resultados == 0)
     unos = np.sum(resultados == 1)
 
-    print(f"\nDespués de {veces} mediciones:")
+    print(f"\nProbabilidad de medir 0: {p0:.4f}")
+    print(f"Probabilidad de medir 1: {p1:.4f}")
+
+    print(f"\nResultados de {veces} mediciones:")
     print(f"0 -> {ceros}")
     print(f"1 -> {unos}")
 
 
 # ===========================
-# PRUEBA 1
+# MENÚ
 # ===========================
 
-print("===== X|0> =====")
+print("Compuertas disponibles")
+print("1. X")
+print("2. Z")
+print("3. H")
+print("4. H seguida de H")
 
-estado_x = aplicar_compuerta(estado, X)
+opcion = input("\nSeleccione una opción: ")
 
-print("Estado:", estado_x)
+estado = estado_inicial.copy()
 
-medir(estado_x)
+if opcion == "1":
+    estado = aplicar_compuerta(estado, X)
+    print("\nAplicando X")
 
+elif opcion == "2":
+    estado = aplicar_compuerta(estado, Z)
+    print("\nAplicando Z")
 
-# ===========================
-# PRUEBA 2
-# ===========================
+elif opcion == "3":
+    estado = aplicar_compuerta(estado, H)
+    print("\nAplicando H")
 
-print("\n===== H|0> =====")
+elif opcion == "4":
+    estado = aplicar_compuerta(estado, H)
+    estado = aplicar_compuerta(estado, H)
+    print("\nAplicando H seguida de H")
 
-estado_h = aplicar_compuerta(estado, H)
+else:
+    print("Opción inválida.")
+    exit()
 
-print("Estado:", estado_h)
+print("\nEstado final:")
+print(estado)
 
-medir(estado_h)
-
-
-# ===========================
-# PRUEBA 3
-# ===========================
-
-print("\n===== HH|0> =====")
-
-estado_hh = aplicar_compuerta(
-    aplicar_compuerta(estado, H),
-    H
-)
-
-print("Estado:", estado_hh)
-
-medir(estado_hh)
+medir(estado)
