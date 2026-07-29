@@ -1,5 +1,5 @@
 import heapq
-
+from copy import deepcopy
 
 def dijkstra(grafo, origen):
     """
@@ -106,14 +106,127 @@ def eliminar_arista(grafo, origen, destino):
 
     if origen in grafo[destino]:
         del grafo[destino][origen]
+def ingreso_pares(grafo):
+    """
+    Pide al usuario los pares origen-destino que se quieren analizar
+    (mínimo 5, según lo pedido en el enunciado).
+    """
+    while True:
+        cantidad = int(input("\n¿Cuántos pares origen-destino desea probar (mínimo 5)? "))
+        if cantidad >= 5:
+            break
+        print("Debe ingresar al menos 5 pares.")
+
+    pares = []
+    print("\nIngrese cada par en el formato: origen destino")
+    for i in range(cantidad):
+        while True:
+            print(f"\nPar {i + 1}:")
+            origen, destino = input().split()
+            origen, destino = origen.upper(), destino.upper()
+
+            if origen not in grafo or destino not in grafo:
+                print("Alguno de los dos nodos no existe en el grafo. Intente de nuevo.")
+                continue
+            pares.append((origen, destino))
+            break
+
+    return pares
+
+
+def calcular_distancias_pares(grafo, pares):
+    """
+    Calcula, para cada par (origen, destino), la distancia mínima usando
+    Dijkstra. Cachea los resultados de Dijkstra por origen para no recalcular
+    innecesariamente cuando varios pares comparten el mismo origen.
+    """
+    cache = {}
+    resultados = {}
+
+    for origen, destino in pares:
+        if origen not in cache:
+            distancias, _ = dijkstra(grafo, origen)
+            cache[origen] = distancias
+
+        distancias = cache[origen]
+        resultados[(origen, destino)] = distancias.get(destino, float("inf"))
+
+    return resultados
+
+
+def formatear_distancia(d):
+    return "INF" if d == float("inf") else str(d)
+
+
+def construir_filas(pares, dist_antes, dist_despues):
+    filas = []
+
+    for origen, destino in pares:
+        d_antes = dist_antes[(origen, destino)]
+        d_despues = dist_despues[(origen, destino)]
+
+        if d_antes == float("inf"):
+            estado = "YA ESTABA DESCONECTADO"
+            diferencia = "-"
+        elif d_despues == float("inf"):
+            estado = "DESCONECTADO"
+            diferencia = "-"
+        elif d_despues > d_antes:
+            estado = "MAS LARGA"
+            diferencia = str(round(d_despues - d_antes, 2))
+        elif d_despues < d_antes:
+            estado = "MAS CORTA"
+            diferencia = str(round(d_despues - d_antes, 2))
+        else:
+            estado = "SIN CAMBIO"
+            diferencia = "0"
+
+        filas.append({
+            "origen": origen,
+            "destino": destino,
+            "antes": formatear_distancia(d_antes),
+            "despues": formatear_distancia(d_despues),
+            "diferencia": diferencia,
+            "estado": estado,
+        })
+
+    return filas
+
+
+def imprimir_tabla(filas):
+    encabezados = ["Origen", "Destino", "Dist. antes", "Dist. despues", "Diferencia", "Estado"]
+    anchos = [8, 8, 12, 14, 11, 24]
+
+    def linea_sep():
+        return "+" + "+".join("-" * a for a in anchos) + "+"
+
+    def fila_texto(valores):
+        return "|" + "|".join(f" {str(v):<{a - 1}}" for v, a in zip(valores, anchos)) + "|"
+
+    print("\n" + linea_sep())
+    print(fila_texto(encabezados))
+    print(linea_sep())
+    for f in filas:
+        print(fila_texto([f["origen"], f["destino"], f["antes"], f["despues"], f["diferencia"], f["estado"]]))
+    print(linea_sep())
+
 
 def main():
 
-    print("===== ANÁLISIS DE RED DE TRANSPORTE =====\n")
+    print("===== IMPACTO DEL CIERRE DE UNA ESTACIÓN EN LA RED =====\n")
 
-    # Leer el grafo
+    # 1) Leer el grafo original
     grafo = ingreso_grafo()
 
+    # 2) Pedir los pares origen-destino a analizar (mínimo 5)
+    pares = ingreso_pares(grafo)
+
+    # 3) Calcular las distancias ANTES del cierre (se usa una copia, para no
+    #    perder el grafo original antes de aplicar el cierre)
+    grafo_antes = deepcopy(grafo)
+    dist_antes = calcular_distancias_pares(grafo_antes, pares)
+
+    # 4) Preguntar qué se va a cerrar
     print("\n¿Qué desea cerrar?")
     print("1. Una estación (nodo)")
     print("2. Una conexión (arista)")
@@ -122,59 +235,34 @@ def main():
     opcion = input("\nSeleccione una opción: ")
 
     if opcion == "1":
-
         nodo = input("Ingrese la estación a cerrar: ").upper()
-
         if nodo not in grafo:
             print("La estación no existe.")
             return
-
         eliminar_nodo(grafo, nodo)
 
     elif opcion == "2":
-
-        origen = input("Origen de la conexión: ").upper()
-        destino = input("Destino de la conexión: ").upper()
-
-        if origen not in grafo or destino not in grafo:
+        origen_c = input("Origen de la conexión: ").upper()
+        destino_c = input("Destino de la conexión: ").upper()
+        if origen_c not in grafo or destino_c not in grafo:
             print("Algún nodo no existe.")
             return
-
-        eliminar_arista(grafo, origen, destino)
+        eliminar_arista(grafo, origen_c, destino_c)
 
     elif opcion != "3":
         print("Opción inválida.")
         return
 
-    origen = input("\nIngrese el nodo origen: ").upper()
+    # 5) Calcular las distancias DESPUÉS del cierre sobre el grafo modificado
+    dist_despues = calcular_distancias_pares(grafo, pares)
 
-    if origen not in grafo:
-        print("El nodo origen no existe.")
-        return
+    # 6) Construir y mostrar la tabla comparativa pedida en el enunciado:
+    #    origen, destino, distancia antes, distancia después, diferencia, estado
+    filas = construir_filas(pares, dist_antes, dist_despues)
 
-    distancias, anteriores = dijkstra(grafo, origen)
-
-    print("\n DISTANCIAS MÍNIMAS ")
-
-    for nodo in sorted(grafo.keys()):
-        distancia = distancias[nodo]
-
-        if distancia == float("inf"):
-            print(f"{origen} -> {nodo}: No existe camino")
-        else:
-            print(f"{origen} -> {nodo}: {distancia}")
-
-    print("\n CAMINOS ")
-
-    for nodo in sorted(grafo.keys()):
-
-        camino = reconstruir_camino(anteriores, origen, nodo)
-
-        if camino:
-            print(f"{origen} -> {nodo}: {' -> '.join(camino)}")
-        else:
-            print(f"{origen} -> {nodo}: No existe camino")
+    print("\n===== TABLA COMPARATIVA (ANTES vs. DESPUÉS DEL CIERRE) =====")
+    imprimir_tabla(filas)
 
 
 if __name__ == "__main__":
-    main()       
+    main()
