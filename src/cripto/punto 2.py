@@ -27,7 +27,7 @@ def descifrar(cifrado, d, n):
 
 
 def main():
-    print("===== RSA DE JUGUETE =====")
+    print("RSA DE JUGUETE ")
 
     p = int(input("Ingrese p: "))
     q = int(input("Ingrese q: "))
@@ -46,7 +46,7 @@ def main():
     cifrado = cifrar(mensaje, e, n)
     descifrado = descifrar(cifrado, d, n)
 
-    print("\n===== RESULTADOS =====")
+    print("\nRESULTADOS ")
     print(f"n = {n}")
     print(f"phi(n) = {phi}")
     print(f"d = {d}")
