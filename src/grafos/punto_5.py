@@ -100,12 +100,14 @@ def eliminar_nodo(grafo, nodo):
     for vecino in grafo:
         if nodo in grafo[vecino]:
             del grafo[vecino][nodo]
+
 def eliminar_arista(grafo, origen, destino):
-    if destino in grafo[origen]:
+    if origen in grafo and destino in grafo[origen]:
         del grafo[origen][destino]
 
-    if origen in grafo[destino]:
+    if destino in grafo and origen in grafo[destino]:
         del grafo[destino][origen]
+
 def ingreso_pares(grafo):
     """
     Pide al usuario los pares origen-destino que se quieren analizar
@@ -137,19 +139,25 @@ def ingreso_pares(grafo):
 def calcular_distancias_pares(grafo, pares):
     """
     Calcula, para cada par (origen, destino), la distancia mínima usando
-    Dijkstra. Cachea los resultados de Dijkstra por origen para no recalcular
-    innecesariamente cuando varios pares comparten el mismo origen.
+    Dijkstra. Si un origen fue eliminado del grafo, la distancia se
+    considera infinita.
     """
     cache = {}
     resultados = {}
 
     for origen, destino in pares:
+
+        # Si el origen ya no existe (porque fue eliminado)
+        if origen not in grafo:
+            resultados[(origen, destino)] = float("inf")
+            continue
+
+        # Ejecutar Dijkstra una sola vez por cada origen
         if origen not in cache:
             distancias, _ = dijkstra(grafo, origen)
             cache[origen] = distancias
 
-        distancias = cache[origen]
-        resultados[(origen, destino)] = distancias.get(destino, float("inf"))
+        resultados[(origen, destino)] = cache[origen].get(destino, float("inf"))
 
     return resultados
 
