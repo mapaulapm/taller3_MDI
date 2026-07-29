@@ -91,11 +91,18 @@ entrada = input(
 
 minterminos = list(map(int, entrada.split()))
 
-tabla_original(minterminos)
+original = tabla_original(minterminos)
 
 expresion = simplificar(minterminos)
 
 print("\nExpresión simplificada:")
 print(expresion)
 
-tabla_simplificada(expresion)
+simplificada = tabla_simplificada(expresion)
+
+print("\nVerificación:")
+
+if original == simplificada:
+    print("✓ Las dos expresiones son equivalentes.")
+else:
+    print("✗ Las expresiones NO son equivalentes.")
