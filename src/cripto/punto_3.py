@@ -23,3 +23,34 @@ def crear_servidores(notas):
         servidor3.append(p3)
 
     return servidor1, servidor2, servidor3
+# suma de las notas
+def reconstruir_suma(s1, s2, s3):
+    suma = 0
+
+    for i in range(len(s1)):
+        suma += (s1[i] + s2[i] + s3[i]) % MODULO
+
+    return suma
+
+# nota promedio
+def calcular_promedio(suma, cantidad):
+    return suma / cantidad
+def main():
+    entrada = input("Ingrese las notas separadas por espacios: ")
+    notas = list(map(int, entrada.split()))
+
+    s1, s2, s3 = crear_servidores(notas)
+
+    print("Servidor 1:", s1)
+    print("Servidor 2:", s2)
+    print("Servidor 3:", s3)
+
+    suma = reconstruir_suma(s1, s2, s3)
+    promedio = calcular_promedio(suma, len(notas))
+
+    print("\nResultados")
+    print("Suma:", suma)
+    print("Promedio:", promedio)
+
+if __name__ == "__main__":
+    main()
