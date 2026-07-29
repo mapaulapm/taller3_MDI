@@ -61,17 +61,36 @@ def reconstruir_camino(anteriores, origen, destino):
 
     return []
 
+def ingreso_grafo():
+    grafo={}
+
+    n=int(input("Ingrese el número de nodos"))
+    print("\nIngrese el nombre de cada nodo:")
+    for _ in range(n):
+        nodo = input("Nodo: ").strip().upper()
+        grafo[nodo] = {}
+
+    a = int(input("\nIngrese el número de aristas: "))
+
+    print("\nIngrese las aristas en el formato:")
+    print("origen destino peso")
+
+    for i in range(a):
+        print(f"\nArista {i+1}:")
+        origen, destino, peso = input().split()
+
+        origen = origen.upper()
+        destino = destino.upper()
+        peso = float(peso)
+
+        grafo[origen][destino] = peso
+        grafo[destino][origen] = peso   # Grafo no dirigido
+
+    return grafo    
 
 def main():
 
-    grafo = {
-        "A": {"B": 4, "C": 2},
-        "B": {"A": 4, "C": 1, "D": 5},
-        "C": {"A": 2, "B": 1, "D": 8, "E": 10},
-        "D": {"B": 5, "C": 8, "E": 2, "F": 6},
-        "E": {"C": 10, "D": 2, "F": 3},
-        "F": {"D": 6, "E": 3},
-    }
+    grafo = ingreso_grafo()
 
     origen = input("Nodo origen: ").upper()
 
