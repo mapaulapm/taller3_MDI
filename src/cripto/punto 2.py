@@ -45,7 +45,7 @@ def main():
 
     cifrado = cifrar(mensaje, e, n)
     descifrado = descifrar(cifrado, d, n)
-
+# resultados que se van a generar (osea todo lo que se pidio en el taller)
     print("\nRESULTADOS ")
     print(f"n = {n}")
     print(f"phi(n) = {phi}")
